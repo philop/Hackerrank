@@ -5,18 +5,21 @@ import java.io.FileNotFoundException;
 import java.net.URL;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class Triplets {
 
     static long countTriplets(List<Long> arr, long r) {
-        Map<Long, Long> countingMap = arr.stream().collect(Collectors.groupingBy(el -> el, Collectors.counting()));
+        Map<Long, Set<Integer>> indexCountingMap = IntStream.range(0, arr.size()).boxed().collect(Collectors.groupingBy(index -> arr.get(index), Collectors.toCollection(TreeSet::new)));
+        Map<Long, Long> countingMap = indexCountingMap.entrySet().stream().collect(Collectors.toMap(Map.Entry<Long, Set<Integer>>::getKey, entry->Long.valueOf(entry.getValue().size())));
+        //Map<Long, Long> countingMap = arr.stream().collect(Collectors.groupingBy(el -> el, Collectors.counting()));
         return countingMap.entrySet().stream().map((el) -> {
             Long counterMid = countingMap.get(el.getKey() * r);
             Long counterEnd = countingMap.get(el.getKey() * r * r);
             if (counterMid != null && counterEnd != null && r != 1)
-                return el.getValue() * counterMid * counterEnd;
+                return (el.getValue()) * counterMid * counterEnd * 1l;
             else if (counterMid != null && counterEnd != null && r == 1)
-                return (el.getValue()-0) * (counterMid - 1) * (counterEnd - 2)/6;
+                return (el.getValue()) * (counterMid - 1) * (counterEnd - 2)/6l;
             else return 0l;
         }).reduce(0l, (el, accumulator) -> accumulator + el);
     }

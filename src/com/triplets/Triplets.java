@@ -31,18 +31,19 @@ public class Triplets {
         var indexSetMids = indexCountingMap.get(el.getKey() * r);
         var indexSetEnds = indexCountingMap.get(el.getKey() * r * r);
 
-        Long reducedMids = indexSetEnds.stream().map(end -> {
+        Optional<Long> reducedStarts = indexSetEnds.stream().map(end -> {
             if(indexSetMids.higher(end) != null)
-                return indexSetMids.tailSet(indexSetMids.higher(end)).size() *1L;
-            else return 1L;
-        }).reduce(1L, (a, b) -> a * b);
-        Long reducedStarts = indexSetMids.stream().map(end -> {
-            if(indexSetStarts.higher(end) != null)
-                return indexSetStarts.tailSet(indexSetStarts.higher(end)).size() * 1L;
-            else return 1L;
-        }).reduce(1L, (a, b) -> a * b);
+                return indexSetMids.tailSet(indexSetMids.higher(end));
+            else return Collections.emptySet();
+        }).flatMap(midSet -> midSet.stream().map(mid->{
+            if(indexSetStarts.higher((Integer) mid) != null)
+                return (long) indexSetStarts.tailSet(indexSetStarts.higher((Integer) mid)).size();
+            else return 0L;
+        }))
 
-        return (long) indexSetEnds.size() * reducedMids * reducedStarts;
+        .reduce(Long::sum);
+
+        return (long) reducedStarts.get();
     }
 
     private String readFile(String name){
@@ -70,7 +71,7 @@ public class Triplets {
         testCase("1 3 9 9 27 81", 3, 6);
         testCase("1 5 5 25 125", 5, 4);
         testCase("1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1 1", 1, 161700);
-        //testCase(t.readFile( "input.txt"), 3, 2325652489l);
+        testCase(t.readFile( "input.txt"), 3, 2325652489l);
     }
 
     private static void testCase(String testCase, int r, long result) {

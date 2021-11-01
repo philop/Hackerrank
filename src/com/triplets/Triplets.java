@@ -12,21 +12,25 @@ public class Triplets {
     static long countTriplets(List<Long> arr, long r) {
         Map<Long, TreeSet<Integer>> indexCountingMap = IntStream.range(0, arr.size()).boxed()
                 .collect(Collectors.groupingBy(arr::get, Collectors.toCollection(()->new TreeSet<>(Collections.reverseOrder()))));
-        Map<Long, Long> countingMap = indexCountingMap.entrySet().stream().collect(Collectors.toMap(Map.Entry<Long, TreeSet<Integer>>::getKey, entry->Long.valueOf(entry.getValue().size())));
+
         //Map<Long, Long> countingMap = arr.stream().collect(Collectors.groupingBy(el -> el, Collectors.counting()));
-        return countingMap.entrySet().stream().map((el) -> {
-            Long counterMid = countingMap.get(el.getKey() * r);
-            Long counterEnd = countingMap.get(el.getKey() * r * r);
-            if (counterMid != null && counterEnd != null && r != 1)
+        return indexCountingMap.entrySet().stream().filter(el->{
+            TreeSet<Integer> counterMid = indexCountingMap.get(el.getKey() * r);
+            TreeSet<Integer> counterEnd = indexCountingMap.get(el.getKey() * r * r);
+            return counterMid != null && counterEnd != null;
+        }).map((el) -> {
+            int coutnerStart = indexCountingMap.get(el.getKey()).size();
+            int counterMid = indexCountingMap.get(el.getKey() * r).size();
+            int counterEnd = indexCountingMap.get(el.getKey() * r * r).size();
+            if (r != 1)
                 //return el.getValue() * counterMid * counterEnd;
-                return countPermutations(r, indexCountingMap, el);
-            else if (counterMid != null && counterEnd != null)
-                return el.getValue() * (counterMid - 1) * (counterEnd - 2)/ 6L;
-            else return 0L;
+                return countTripletsFromPairs(r, indexCountingMap, el);
+            else
+                return (long) coutnerStart * (counterMid - 1) * (counterEnd - 2)/ 6L;
         }).reduce(0L, Long::sum);
     }
 
-    private static Long countPermutations(long r, Map<Long, TreeSet<Integer>> indexCountingMap, Map.Entry<Long, Long> el) {
+    private static Long countTripletsFromPairs(long r, Map<Long, TreeSet<Integer>> indexCountingMap, Map.Entry<Long, TreeSet<Integer>> el) {
         TreeSet<Integer> indexSetStarts = indexCountingMap.get(el.getKey());
         TreeSet<Integer> indexSetMids = indexCountingMap.get(el.getKey() * r);
         TreeSet<Integer> indexSetEnds = indexCountingMap.get(el.getKey() * r * r);

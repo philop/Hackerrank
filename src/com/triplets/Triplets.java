@@ -27,9 +27,9 @@ public class Triplets {
     }
 
     private static Long countPermutations(long r, Map<Long, TreeSet<Integer>> indexCountingMap, Map.Entry<Long, Long> el) {
-        var indexSetStarts = indexCountingMap.get(el.getKey());
-        var indexSetMids = indexCountingMap.get(el.getKey() * r);
-        var indexSetEnds = indexCountingMap.get(el.getKey() * r * r);
+        TreeSet<Integer> indexSetStarts = indexCountingMap.get(el.getKey());
+        TreeSet<Integer> indexSetMids = indexCountingMap.get(el.getKey() * r);
+        TreeSet<Integer> indexSetEnds = indexCountingMap.get(el.getKey() * r * r);
 
         Optional<Long> reducedStarts = indexSetEnds.stream().map(end -> {
             if(indexSetMids.higher(end) != null)
